@@ -43,21 +43,21 @@ describe("views/user", function() {
     // TheFive logs in and creates user Test
     await browser.visit("/osmbc/admin");
     await browser.click("#createUser");
-    await browser.fill("OSMUser","test")
-      .select("language","DE")
-      .select("access","full")
-      .click("#save");
+    await browser.fill("OSMUser","test");
+    await browser.select("language","DE");
+    await browser.select("access","full");
+    await browser.pressButton("#save");
 
     // TheFive creates the user test a second time
     await browser.visit("/osmbc/admin");
     await browser.click("#createUser");
 
-    // clicking SAVE should result in an error
+    //    ing SAVE should result in an error
     try {
-      await browser.fill("OSMUser","test")
-        .select("language","DE")
-        .select("access","full")
-        .click("#save");
+      await browser.fill("OSMUser","test");
+      await browser.select("language","DE");
+      await browser.select("access","full");
+      await browser.pressButton("#save");
     } catch(err) {
       should(err.cause.message).eql("Server returned status code 409 from http://localhost:35043/usert/3");
       should(browser.html()).containEql("User &gt;test&lt; already exists");
@@ -70,10 +70,11 @@ describe("views/user", function() {
     // TheFive creates an user test
     await browser.visit("/osmbc/admin");
     await browser.click("#createUser");
-    await browser.fill("OSMUser","test")
-      .select("language","DE")
-      .select("access","full")
-      .click("#save");
+    await browser.fill("OSMUser","test");
+    await browser.select("language","DE");
+    await browser.select("access","full");
+
+    await browser.pressButton("#save");
 
 
     // looking at user test shows, that username can be changed
@@ -90,11 +91,10 @@ describe("views/user", function() {
   });
   it("should save userdata and calculate WN User", async function() {
     await browser.visit("/usert/create");
-    await browser
-      .fill("OSMUser", "TestUser")
-      .fill("EMail", "")
-      .fill("mdWeeklyAuthor", "mdWeeklyAuthor")
-      .click("#save");
+    await browser.fill("OSMUser", "TestUser");
+    await browser.fill("EMail", "");
+    await browser.fill("mdWeeklyAuthor", "mdWeeklyAuthor");
+    await browser.pressButton("#save");
     let result = await userModule.findById(2);
     browser.assert.expectHtmlSync("user","freshCreatedUser");
     should(result.OSMUser).eql("TestUser");
@@ -106,11 +106,10 @@ describe("views/user", function() {
     await browser.visit("/usert/create");
     browser.evaluate("document.getElementById('mailComment_DE').checked = true");
     browser.evaluate("document.getElementById('mailBlogLanguageStatusChange_DE').checked = true");
-    await browser
-      .fill("OSMUser", "TestUser")
-      .fill("EMail", "")
-      .fill("mdWeeklyAuthor", "mdWeeklyAuthor")
-      .pressButton("OK");
+    await browser.fill("OSMUser", "TestUser");
+    await browser.fill("EMail", "");
+    await browser.fill("mdWeeklyAuthor", "mdWeeklyAuthor");
+    await browser.pressButton("OK");
     let result = await userModule.findById(2);
     should(result.OSMUser).eql("TestUser");
     should(result.mdWeeklyAuthor).eql("mdWeeklyAuthor");
@@ -123,11 +122,10 @@ describe("views/user", function() {
     browser.evaluate("document.getElementById('mailBlogLanguageStatusChange_DE').checked = true");
     browser.evaluate("document.getElementById('mailComment_EN').checked = true");
     browser.evaluate("document.getElementById('mailBlogLanguageStatusChange_EN').checked = true");
-    await browser
-      .fill("OSMUser", "TestUser")
-      .fill("EMail", "")
-      .fill("mdWeeklyAuthor", "mdWeeklyAuthor")
-      .pressButton("OK");
+    await browser.fill("OSMUser", "TestUser");
+    await browser.fill("EMail", "");
+    await browser.fill("mdWeeklyAuthor", "mdWeeklyAuthor");
+    await browser.pressButton("OK");
     let result = await userModule.findById(2);
     should(result.OSMUser).eql("TestUser");
     should(result.mdWeeklyAuthor).eql("mdWeeklyAuthor");
@@ -155,7 +153,7 @@ describe("views/user", function() {
 
     await browser.visit("/usert/1");
     browser.fill("EMail","test@test.org");
-    await browser.click("#save");
+    await browser.pressButton("#save");
 
     should(mailChecker.calledOnce);
 

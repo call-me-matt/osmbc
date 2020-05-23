@@ -81,7 +81,7 @@ describe("uc/blog", function() {
 
       await browserTheFive.click("a#createblog");
       // Confirm that you really want to create a blog
-      await browserTheFive.click("button#createBlog");
+      await browserTheFive.pressButton("button#createBlog");
 
       // click on the second blog in the table (thats the WN251 new created)
       await browserTheFive.click("tbody>tr:nth-child(2)>td>a");
@@ -103,45 +103,45 @@ describe("uc/blog", function() {
       await browserTheFive.click("button#readyreview");
 
       // start personal review
-      await browserTheFive.click("button#reviewButtonDE");
+      await browserTheFive.pressButton("button#reviewButtonDE");
 
       // Do a first review comment
 
-      browserTheFive.fill("textarea#reviewCommentDE", "1rst Review Text for DE");
+      await browserTheFive.fill("textarea#reviewCommentDE", "1rst Review Text for DE");
       // simulate keyup to enable button for click.
       browserTheFive.keyUp("textarea#reviewCommentDE", 30);
-      await browserTheFive.click("button#reviewButtonDE:enabled");
+      await browserTheFive.pressButton("button#reviewButtonDE:enabled");
 
-      await browserTheFive.click("button#reviewButtonDE");
+      await browserTheFive.pressButton("button#reviewButtonDE");
 
       // do a second review comment, and cancel that
 
-      browserTheFive.fill("textarea#reviewCommentDE", "2nd Review Text for DE");
+      await browserTheFive.fill("textarea#reviewCommentDE", "2nd Review Text for DE");
       // simulate keyup to enable button for click.
       browserTheFive.keyUp("textarea#reviewCommentDE", 30);
-      await browserTheFive.click("button#reviewButtonCancelDE:enabled");
+      await browserTheFive.pressButton("button#reviewButtonCancelDE:enabled");
       browserTheFive.assert.expectHtmlSync(errors, "blog", "WN251Reviewed");
 
-      await browserTheFive.click("button#didexport");
+      await browserTheFive.pressButton("button#didexport");
 
       browserTheFive.assert.expectHtmlSync(errors, "blog", "WN251Exported");
 
-      await browserTheFive.click("button#closebutton");
+      await browserTheFive.pressButton("button#closebutton");
 
       browserTheFive.assert.expectHtmlSync(errors, "blog", "WN251Closed");
 
       await b2.visit("/blog/WN251");
       // Start Review for blog in english
-      await b2.click("button#readyreview");
+      await b2.pressButton("button#readyreview");
 
 
       // start personal review
-      await b2.click("button#reviewButtonEN");
+      await b2.pressButton("button#reviewButtonEN");
 
-      b2.fill("textarea#reviewCommentEN", "1rst Review Text for EN");
+      await b2.fill("textarea#reviewCommentEN", "1rst Review Text for EN");
       // simulate keyup to enable button for click.
       b2.keyUp("textarea#reviewCommentEN", 30);
-      await b2.click("button#reviewButtonEN");
+      await b2.pressButton("button#reviewButtonEN");
 
       // in difference to DE language, here no export should appear.
       b2.assert.element("button#closebutton");
@@ -245,4 +245,3 @@ describe("uc/blog", function() {
 });
 
 /* jshint ignore:end */
-

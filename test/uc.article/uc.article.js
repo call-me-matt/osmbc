@@ -255,7 +255,8 @@ describe("uc.article", function() {
       this.timeout(maxTimer * 2);
       await browser.visit("/article/1");
 
-      browser.fill("comment", "Add a test comment");
+      await browser.fill("comment", "Add a test comment");
+
       await browser.pressButton("AddComment");
 
       let article = await articleModule.findById(1);
@@ -263,6 +264,7 @@ describe("uc.article", function() {
       should(article.commentList.length).eql(1);
       should(article.commentList[0].text).eql("Add a test comment");
       should(article.commentList[0].user).eql("TheFive");
+      browser.tabs.current = browser.tabs[1];
       await browser.click('span[id="EditComment0"]');
 
       browser.fill("comment", "And Change It");

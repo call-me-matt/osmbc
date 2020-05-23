@@ -34,9 +34,8 @@ describe("uc/config", function() {
     await browser.wait(10);
     browser.assert.text("table#resulttable", "Wo Was Wann Land Munich OpenStreetMap Default Meeting 2015-12-15 Germany");
     try {
-      await browser
-        .fill("yaml", '"town":\n  "DE": "WW"\n"title":\n  "DE": "WA"\n"date":\n  "DE": "WNN"\n  "country":\n  "DE": "LL"')
-        .pressButton("OK");
+      await browser.fill("yaml", '"town":\n  "DE": "WW"\n"title":\n  "DE": "WA"\n"date":\n  "DE": "WNN"\n  "country":\n  "DE": "LL"');
+      await browser.pressButton("OK");
     } catch (err) {
       should(err.message).eql("Server returned status code 500 from http://localhost:35043/config/calendartranslation");
     }
@@ -45,9 +44,8 @@ describe("uc/config", function() {
   it("should open and save calendartranslation", async function() {
     await browser.visit("/config/calendartranslation");
     browser.assert.text("table#resulttable", "Wo Was Wann Land Munich OpenStreetMap Default Meeting 2015-12-15 Germany");
-    await browser
-      .fill("yaml", '"town":\n  "DE": "WW"\n"title":\n  "DE": "WA"\n"date":\n  "DE": "WNN"\n"country":\n  "DE": "LL"')
-      .pressButton("OK");
+    await browser.fill("yaml", '"town":\n  "DE": "WW"\n"title":\n  "DE": "WA"\n"date":\n  "DE": "WNN"\n"country":\n  "DE": "LL"');
+    await browser.pressButton("OK");
     browser.assert.text("table#resulttable", "WW WA WNN LL Munich OpenStreetMap Default Meeting 2015-12-15 Germany");
   });
   it("should open and save eventsfilter", async function() {
@@ -58,4 +56,3 @@ describe("uc/config", function() {
 
 
 /* jshint ignore:end */
-
