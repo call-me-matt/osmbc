@@ -4,6 +4,8 @@
 
 
 const async = require("async");
+const sinon = require("sinon");
+const passport = require("passport");
 const nock = require("nock");
 const cheerio = require("cheerio");
 const should = require("should");
@@ -29,7 +31,7 @@ describe("uc/collect", function() {
   });
 
   beforeEach(async function() {
-    nockLoginPage = testutil.nockLoginPage();
+    //nockLoginPage = testutil.nockLoginPage();
     await testutil.clearDB();
     await userModule.createNewUser({OSMUser: "TheFive", access: "full", language: "DE", mainLang: "DE", secondLang: "EN",email:"a@b.c"});
     await blogModule.createNewBlog({OSMUser: "test",email:"d@e.f"}, {name: "blog",status:"edit"});
@@ -58,23 +60,23 @@ describe("uc/collect", function() {
   describe("Menu Fuctions", function() {
     it("should call search with test", async function() {
       this.timeout(5000);
-      await browser.visit("/article/search");
-      browser.fill("search", "http://www.test.dä/holla");
-      await browser.pressButton("SearchNow");
+      await browser.open(testutil.expandUrl("/article/search"));
+      await browser.type("input.search", "http://www.test.dä/holla");
+      await browser.clickText("SearchNow");
       browser.assert.text("p#articleCounter", "Displaying 2 of 2 results.");
     });
   });
   describe("Collect", function() {
     it("should search and store collected article", async function() {
-      await browser.visit("/article/create");
-      browser.fill("search", "searchfor");
+      await browser.open(testutil.expandUrl("/article/create"));
+      browser.type("search", "searchfor");
       await browser.pressButton("SearchNow");
-      browser.fill("title", "Test Title for Article");
-      await browser.pressButton("OK");
+      browser.type("title", "Test Title for Article");
+      await browser.clickText("OK");
       browser.assert.expectHtmlSync("collect","editPageAfterCollect");
     });
     it("should search and find existing article", async function() {
-      await browser.visit("/article/create");
+      await browser.open(testutil.expandUrl("/article/create"));
       browser.fill("search", "http://www.test.dä/holla")
       await browser.pressButton("SearchNow");
       browser.assert.expectHtmlSync("collect","foundAnArticle");
@@ -83,4 +85,3 @@ describe("uc/collect", function() {
 });
 
 /* jshint ignore:end */
-

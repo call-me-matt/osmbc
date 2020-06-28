@@ -5,10 +5,11 @@ var async  = require("async");
 var path   = require("path");
 var nock   = require("nock");
 var fs     = require("fs");
+const sinon = require("sinon");
 
 var debug  = require("debug")("OSMBC:test:testutil");
 // use zombie.js as headless browser
-var Browser = require("zombie");
+var wendigo = require("wendigo");
 var http = require("http");
 var request = require("request");
 
@@ -367,14 +368,9 @@ function fakeNextPassportLogin(userString) {
 
 exports.startServerSync = function startServerSync(userString) {
   debug("startServer");
+  should.not.exist(userString);
   if (server) exports.stopServer();
   server = http.createServer(app).listen(config.getServerPort());
-
-  if (typeof userString === "undefined") {
-    return;
-  }
-  console.warn("startServerSync(userString) is deprecated. see routes.article tests.");
-  fakeNextPassportLogin(userString);
 };
 
 exports.startServer = function startServer(userString, callback) {
@@ -389,7 +385,7 @@ exports.startServer = function startServer(userString, callback) {
 
 
 function nockLoginPage() {
-  return nock("http://localhost:35043", {allowUnmocked: true})
+  return nock("http://localhost:35043")
     .get(config.htmlRoot() + "/login")
     .reply(302, "redirect", {"Location": "http://localhost:35043" + config.htmlRoot() + "/auth/openstreetmap"});
 }
@@ -430,19 +426,23 @@ exports.getBrowser = function getBrowser() {
 };
 
 exports.getNewBrowser = function getNewBrowser(userString) {
-  return new Promise((resolve) => {
-    let browser = new Browser({ maxWait: 120000, site: "http://localhost:" + config.getServerPort() });
+  return new Promise( async (resolve) => {
+    let browser = await wendigo.createBrowser({ defaultTimeout: 120000 });
     if (!userString) return resolve(browser);
     should.exist(userString);
     fakeNextPassportLogin(userString);
     let nockLoginInterceptor = nockLoginPage();
-    browser.visit("/osmbc", function() {
-      nock.removeInterceptor(nockLoginInterceptor);
-      // ignore any error and return the given browser.
-      resolve(browser);
-    });
+    //  await browser.auth.bearer("at-1234");
+    //await browser.requests.waitForResponse(exports.expandUrl("/login"));
+    await browser.open(exports.expandUrl("/osmbc"));
+    nock.removeInterceptor(nockLoginInterceptor);
+    resolve(browser);
   });
 };
+
+exports.expandUrl = function(url) {
+  return "http://localhost:"+ config.getServerPort()+url;
+}
 
 exports.fakeNextPassportLogin = fakeNextPassportLogin;
 
@@ -475,15 +475,15 @@ exports.nockHtmlPagesClear = function nockHtmlPagesClear() {
   nock.cleanAll();
 };
 
-Browser.prototype.keyUp = function(targetSelector, keyCode) {
+/*Browser.prototype.keyUp = function(targetSelector, keyCode) {
   let event = this.window.document.createEvent("HTMLEvents");
   event.initEvent("keyup", true, true);
   event.which = keyCode;
   let target = this.window.document.querySelector(targetSelector);
   if (target) target.dispatchEvent(event);
-};
+}; */
 
-Browser.Assert.prototype.expectHtmlSync = function expectHtmlSync(errorList, givenPath, name) {
+/*Browser.Assert.prototype.expectHtmlSync = function expectHtmlSync(errorList, givenPath, name) {
   let stopOnError = false;
   if (!Array.isArray(errorList)) {
     stopOnError = true;
@@ -572,7 +572,7 @@ Browser.Assert.prototype.expectHtml = function expectHtml(givenPath, name, cb) {
   fs.writeFileSync(actualFile, string, "UTF8");
   should(string).eql(expected, "HTML File " + name + " is different.");
   return cb();
-};
+};*/
 
 
 process.on("unhandledRejection", (reason, p) => {
@@ -581,14 +581,14 @@ process.on("unhandledRejection", (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
-
+/*
 Browser.extend(function(browser) {
   browser.on("request", function (req) {
     if (browser.location) {
       req.headers.set("Referer", browser.location.href);
     }
   });
-});
+});*/
 
 
 

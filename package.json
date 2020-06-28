@@ -85,8 +85,8 @@
     "passport-mocked": "^1.4.0",
     "should": "^13.2.3",
     "sinon": "^9.0.2",
-    "xmldom": "^0.1.31",
-    "zombie": "^5.0.8",
-    "timemachine": "^0.3.1"
+    "timemachine": "^0.3.1",
+    "wendigo": "^2.12.1",
+    "xmldom": "^0.1.31"
   }
 }
