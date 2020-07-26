@@ -74,11 +74,13 @@ let allowedLicensesProd = ["MIT",
   "BSD-like",
   "BSD",
   "BSD*",
+  "0BSD",
   "MIT/X11",
   "Apache-2.0",
   "Apache*",
   "LAGPL",
   "(Unlicense OR Apache-2.0)",
+  "(OFL-1.1 AND MIT)",
   "(MIT OR EUPL-1.1+)"];
 
 let allowedLicensesDev = allowedLicensesProd.concat([
