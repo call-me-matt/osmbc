@@ -431,11 +431,12 @@ exports.getNewBrowser = function getNewBrowser(userString) {
     if (!userString) return resolve(browser);
     should.exist(userString);
     fakeNextPassportLogin(userString);
-    let nockLoginInterceptor = nockLoginPage();
-    //  await browser.auth.bearer("at-1234");
+  //  let nockLoginInterceptor = nockLoginPage();
+
+
     //await browser.requests.waitForResponse(exports.expandUrl("/login"));
-    await browser.open(exports.expandUrl("/osmbc"));
-    nock.removeInterceptor(nockLoginInterceptor);
+  //  await browser.open(exports.expandUrl("/osmbc"));
+  //  nock.removeInterceptor(nockLoginInterceptor);
     resolve(browser);
   });
 };

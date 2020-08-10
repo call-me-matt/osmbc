@@ -46,8 +46,11 @@ describe("uc/index", function() {
   describe("Known User", function() {
     describe("Homepage", function() {
       it("should find welcome text on Homepage", async function() {
-        await browser.visit("/osmbc");
-        browser.assert.text("h2", "Welcome to OSM BCOSM BC");
+        nock("https://www.openstreetmap.org").get("/basel").reply(200,"OK");
+        await browser.open("http://127.0.0.1:35043/auth/openstreetmap/callback");
+        await browser.open("http://localhost:35043/osmbc");
+        //await browser.clickAndWaitForNavigation("#login");
+        browser.assert.text("h2", "Welcome to OSM BC");
       });
       it("should have bootstrap.js loaded", async function() {
         this.timeout(6000);
