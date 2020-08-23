@@ -19,7 +19,7 @@ var mockdate = require("mockdate");
 
 
 describe("uc/index", function() {
-  this.timeout(12000);
+  this.timeout(20000);
   var browser;
   beforeEach(async function() {
     mockdate.set(new Date("2016-05-25T20:00"));
@@ -46,11 +46,9 @@ describe("uc/index", function() {
   describe("Known User", function() {
     describe("Homepage", function() {
       it("should find welcome text on Homepage", async function() {
-        nock("https://www.openstreetmap.org").get("/basel").reply(200,"OK");
-        await browser.open("http://127.0.0.1:35043/auth/openstreetmap/callback");
-        await browser.open("http://localhost:35043/osmbc");
-        //await browser.clickAndWaitForNavigation("#login");
-        browser.assert.text("h2", "Welcome to OSM BC");
+        await browser.open(testutil.expandUrl("/osmbc"));
+        c = await browser.cookies.all();
+        await browser.assert.text("h2", "Welcome to OSM BC");
       });
       it("should have bootstrap.js loaded", async function() {
         this.timeout(6000);

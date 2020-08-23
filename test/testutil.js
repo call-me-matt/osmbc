@@ -134,6 +134,7 @@ exports.importData = function importData(data, callback) {
             db.query.bind(null, "delete from blog;"),
             db.query.bind(null, "delete from article;"),
             db.query.bind(null, "delete from changes;"),
+            db.query.bind(null, "delete from session;"),
             db.query.bind(null, "ALTER SEQUENCE usert_id_seq RESTART WITH 1;"),
             db.query.bind(null, "ALTER SEQUENCE blog_id_seq RESTART WITH 1;"),
             db.query.bind(null, "ALTER SEQUENCE article_id_seq RESTART WITH 1;"),
@@ -362,7 +363,9 @@ function fakeNextPassportLogin(userString) {
   };
 
   passport._strategies.openstreetmap._profile = {
-    displayName: userString
+    displayName: userString,
+    provider: "openstreetmap",
+    id: '12345'
   };
 }
 
@@ -385,12 +388,12 @@ exports.startServer = function startServer(userString, callback) {
 
 
 function nockLoginPage() {
-  return nock("http://localhost:35043")
+  return nock(config.url())
     .get(config.htmlRoot() + "/login")
-    .reply(302, "redirect", {"Location": "http://localhost:35043" + config.htmlRoot() + "/auth/openstreetmap"});
+    .reply(302, "redirect", {"Location": config.url() + config.htmlRoot() + "/auth/openstreetmap"});
 }
 
-var baseLink = "http://localhost:" + config.getServerPort() + config.htmlRoot();
+var baseLink = config.url() + config.htmlRoot();
 
 
 exports.getUserJar = function(userString, callback) {
@@ -421,7 +424,7 @@ exports.stopServer = function stopServer(callback) {
 };
 
 exports.getBrowser = function getBrowser() {
-  if (!browser) browser = new Browser({ site: "http://localhost:" + config.getServerPort() });
+  if (!browser) browser = new Browser({ site: config.url() });
   return browser;
 };
 
@@ -431,18 +434,18 @@ exports.getNewBrowser = function getNewBrowser(userString) {
     if (!userString) return resolve(browser);
     should.exist(userString);
     fakeNextPassportLogin(userString);
-  //  let nockLoginInterceptor = nockLoginPage();
+    let nockLoginInterceptor = nockLoginPage();
 
 
     //await browser.requests.waitForResponse(exports.expandUrl("/login"));
-  //  await browser.open(exports.expandUrl("/osmbc"));
-  //  nock.removeInterceptor(nockLoginInterceptor);
+    await browser.open(exports.expandUrl("/auth/openstreetmap"));
+    nock.removeInterceptor(nockLoginInterceptor);
     resolve(browser);
   });
 };
 
 exports.expandUrl = function(url) {
-  return "http://localhost:"+ config.getServerPort()+url;
+  return config.url() + url;
 }
 
 exports.fakeNextPassportLogin = fakeNextPassportLogin;

@@ -91,17 +91,7 @@ passport.use(new Strategy({
 },
 function (token, tokenSecret, profile, done) {
   debug("passport.use Token Function");
-
-  // asynchronous verification, for effect...
-  process.nextTick(function () {
-    debug("passport.use Token Function->prozess.nextTick");
-
-    // To keep the example simple, the user's OpenStreetMap profile is returned to
-    // represent the logged-in user.  In a typical application, you would want
-    // to associate the OpenStreetMap account with a user record in your database,
-    // and return that user instead.
-    return done(null, profile);
-  });
+  return done(null, profile);
 }
 ));
 
