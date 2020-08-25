@@ -20,13 +20,14 @@ var mockdate = require("mockdate");
 
 describe("uc/index", function() {
   this.timeout(20000);
-  var browser;
+  this.retries(4);
+  let browser;
+  nock("https://hooks.slack.com/")
+    .post(/\/services\/.*/)
+    .times(999)
+    .reply(200, "ok");
   beforeEach(async function() {
     mockdate.set(new Date("2016-05-25T20:00"));
-    nock("https://hooks.slack.com/")
-      .post(/\/services\/.*/)
-      .times(999)
-      .reply(200, "ok");
     await testutil.clearDB();
     await userModule.createNewUser({OSMUser: "TheFive", access: "full", language: "DE", email: "a@b.c"});
     await userModule.createNewUser({OSMUser: "OldUser", access: "full", lang: "EN", email: "d@e.f", lastAccess: "2016-02-25T20:00"});
@@ -38,58 +39,72 @@ describe("uc/index", function() {
     await blogModule.createNewBlog({OSMUser: "test"}, {name: "blog", status: "edit"});
   });
 
-  afterEach(function(bddone) {
+  afterEach(async function() {
     mockdate.reset();
-    testutil.stopServer(bddone);
+    if (browser) {
+      await browser.cookies.clear();
+      await browser.close();
+    }
+    browser = null;
+    await testutil.stopServer();
+    await testutil.waitMilliseconds(1000);
   });
 
   describe("Known User", function() {
     describe("Homepage", function() {
       it("should find welcome text on Homepage", async function() {
         await browser.open(testutil.expandUrl("/osmbc"));
-        c = await browser.cookies.all();
         await browser.assert.text("h2", "Welcome to OSM BC");
       });
       it("should have bootstrap.js loaded", async function() {
-        this.timeout(6000);
-        await browser.visit("/osmbc");
-        should(browser.evaluate("(typeof $().modal == 'function'); ")).be.True();
+        await browser.open(testutil.expandUrl("/osmbc"));
+        let result = await browser.evaluate("(typeof $().modal == 'function'); ");
+        should(result).be.True();
       });
     });
     describe("Admin Homepage", function() {
       it("should show it", async function() {
-        await browser.visit("/osmbc/admin");
-        browser.assert.expectHtmlSync("index", "admin_home");
+        await browser.open(testutil.expandUrl("/osmbc/admin"));
+        testutil.expectHtmlSync(browser,"index", "admin_home");
       });
     });
     describe("Not Defined Page", function() {
       it("should throw an error message", async function() {
-        try {
-          await browser.visit("/notdefined.html");
-        } catch (err) {
-          should(err.message).eql("Server returned status code 404 from http://localhost:35043/notdefined.html");
-        }
-        browser.assert.text("h1", "Page Not Found");
+        await browser.open(testutil.expandUrl("/notdefined.html"));
+        await browser.assert.requests.status(404);
+        await browser.assert.text("h1", "Page Not Found");
       });
     });
     describe("LanguageSetter", function() {
       it("should set the language", async function() {
-        await browser.visit("/osmbc");
-        await browser.click("a#lang_EN");
-        // this call is necessary, as zombie looks to make troulbe
-        // with 2 calls to a link going back to referrer in seriex
-        await browser.visit("/osmbc");
-        await browser.click("a#lang2_DE");
-        browser.assert.expectHtmlSync("index", "switchedToEnglishAndGerman");
+        await browser.open(testutil.expandUrl("/osmbc"));
+
+        // Open Language Menu with a click
+        await browser.click(".btn.dropdown-toggle.osmbcbadge-lang");
+
+        // Change language (expecting page reload)
+        await browser.clickAndWaitForNavigation("a#lang_EN");
+
+        // Open Language Menu with a click
+        await browser.click(".btn.dropdown-toggle.osmbcbadge-lang2");
+          // Change language (expecting page reload)
+        await browser.clickAndWaitForNavigation("a#lang2_DE");
+
+        testutil.expectHtmlSync(browser,"index", "switchedToEnglishAndGerman");
       });
       it("should set the language both equal", async function() {
-        await browser.visit("/osmbc");
-        await browser.click("a#lang_EN");
-        // this call is necessary, as zombie looks to make troulbe
-        // with 2 calls to a link going back to referrer in seriex
-        await browser.visit("/osmbc");
-        await browser.click("a#lang2_EN");
-        browser.assert.expectHtmlSync("index", "switchedToEnglishAndEnglish");
+        await browser.open(testutil.expandUrl("/osmbc"));
+
+        // Open Language Menu with a click
+        await browser.click(".btn.dropdown-toggle.osmbcbadge-lang");
+
+        await browser.clickAndWaitForNavigation("a#lang_EN");
+
+        // Open Language Menu with a click
+        await browser.click(".btn.dropdown-toggle.osmbcbadge-lang2");
+
+        await browser.clickAndWaitForNavigation("a#lang2_EN");
+        testutil.expectHtmlSync(browser,"index", "switchedToEnglishAndEnglish");
       });
     });
   });
@@ -97,7 +112,7 @@ describe("uc/index", function() {
     it("should throw an error if user not exits", async function() {
       browser = await testutil.getNewBrowser("TheFiveNotExist");
 
-      await browser.visit("/osmbc");
+      await browser.open(testutil.expandUrl("/osmbc"));
       browser.html().should.containEql("You are logged in as guest");
     });
     it("should throw an error if user is denied", async function() {
@@ -108,7 +123,7 @@ describe("uc/index", function() {
         // ignore error, expect is a 403 error, but the
         // browser html has to be tested
       }
-      browser.assert.expectHtmlSync("index", "denied user");
+      testutil.expectHtmlSync(browser,"index", "denied user");
       browser.html().should.containEql("OSM User &gt;OldUserAway&lt; has no access rights");
     });
   });

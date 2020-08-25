@@ -416,11 +416,15 @@ exports.getUserJar = function(userString, callback) {
 };
 
 exports.stopServer = function stopServer(callback) {
-  debug("stopServer");
-  should.exist(server, "Server was not started, could not stop.");
-  server.close();
-  server = null;
-  if (callback) return callback();
+  function _stopServer(cb) {
+    debug("stopServer");
+    should.exist(server, "Server was not started, could not stop.");
+    server.close();
+    server = null;
+    return cb();
+  }
+  if (callback) return _stopServer(callback);
+  return new Promise((resolve) => {return _stopServer(resolve)});
 };
 
 exports.getBrowser = function getBrowser() {
@@ -487,7 +491,7 @@ exports.nockHtmlPagesClear = function nockHtmlPagesClear() {
   if (target) target.dispatchEvent(event);
 }; */
 
-/*Browser.Assert.prototype.expectHtmlSync = function expectHtmlSync(errorList, givenPath, name) {
+module.exports.expectHtmlSync = function expectHtmlSync(browser,errorList, givenPath, name) {
   let stopOnError = false;
   if (!Array.isArray(errorList)) {
     stopOnError = true;
@@ -498,7 +502,7 @@ exports.nockHtmlPagesClear = function nockHtmlPagesClear() {
   let expected = "not read yet";
   let expectedFile = path.join(__dirname, givenPath, name + ".html");
   let actualFile   = path.join(__dirname, givenPath, name + "_actual.html");
-  let string = this.browser.html();
+  let string = browser.html();
   try {
     expected = fs.readFileSync(expectedFile, "UTF8");
   } catch (err) {
@@ -547,7 +551,7 @@ exports.nockHtmlPagesClear = function nockHtmlPagesClear() {
 };
 
 
-Browser.Assert.prototype.expectHtml = function expectHtml(givenPath, name, cb) {
+module.exports.expectHtml = function expectHtml(givenPath, name, cb) {
   console.warn("Browser.Assert.prototype.expectHtml is deprecated");
 
   if (typeof name === "function") {
@@ -576,7 +580,7 @@ Browser.Assert.prototype.expectHtml = function expectHtml(givenPath, name, cb) {
   fs.writeFileSync(actualFile, string, "UTF8");
   should(string).eql(expected, "HTML File " + name + " is different.");
   return cb();
-};*/
+};
 
 
 process.on("unhandledRejection", (reason, p) => {
@@ -594,6 +598,9 @@ Browser.extend(function(browser) {
   });
 });*/
 
+exports.waitMilliseconds = function _waitMS(ms) {
+  return new Promise( (resolve) => {setTimeout(resolve,ms)});
+}
 
 
 exports.nockLoginPage = nockLoginPage;

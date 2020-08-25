@@ -55,7 +55,7 @@ block all
                       li
                         a(href=layout.htmlroot + "/usert/list?access=full&sort=lastAccess&desc=true&lastAccess=!=never") Who Is Online
                   li.dropdown.hidden-xs
-                    a.dropdown-toggle(href='#', data-toggle='dropdown')
+                    a.dropdown-toggle#tool(href='#', data-toggle='dropdown')
                       | Tool
                       span.caret
                     ul.dropdown-menu(role='menu')
@@ -131,5 +131,3 @@ block all
     body
 
   block scripts
-
-

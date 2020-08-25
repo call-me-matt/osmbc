@@ -75,18 +75,30 @@ describe("uc/blog", function() {
       let browserTheFive = await testutil.getNewBrowser("TheFive");
       let b2 = await testutil.getNewBrowser("TheOther");
 
-      await browserTheFive.visit("/osmbc");
+
+      await browserTheFive.open(testutil.expandUrl("/osmbc"));
+
+
 
       // go to admin page and create a new blog
-      await browserTheFive.click("a#adminlink");
+      await browserTheFive.clickAndWaitForNavigation("a#adminlink");
 
 
-      await browserTheFive.click("a#createblog");
+
+      // Open Tool Menue
+
+      await browserTheFive.click("a#tool");
+
+      await browserTheFive.clickAndWaitForNavigation("a#createblog");
       // Confirm that you really want to create a blog
-      await browserTheFive.click("button#createBlog");
+
+
+      await browserTheFive.refresh();
+    
+      await browserTheFive.clickAndWaitForNavigation("button#createBlog");
 
       // click on the second blog in the table (thats the WN251 new created)
-      await browserTheFive.click("tbody>tr:nth-child(2)>td>a");
+      await browserTheFive.clickAndWaitForNavigation("tbody>tr:nth-child(2)>td>a");
 
       // Have a look at the blog
       browserTheFive.assert.expectHtmlSync(errors, "blog", "WN251OpenMode");
@@ -132,7 +144,7 @@ describe("uc/blog", function() {
 
       browserTheFive.assert.expectHtmlSync(errors, "blog", "WN251Closed");
 
-      await b2.visit("/blog/WN251");
+      await b2.open(testutil.expandUrl("/blog/WN251"));
       // Start Review for blog in english
       await b2.click("button#readyreview");
 
@@ -161,7 +173,7 @@ describe("uc/blog", function() {
     describe("Blog Display", function() {
       it("should show Overview with some configurations", async function() {
         let errors = [];
-        await browser.visit("/blog/WN290");
+        await browser.open(testutil.expandUrl("/blog/WN290"));
         browser.assert.expectHtmlSync(errors, "blog", "blog_wn290_overview"),
         await browser.click('span[name="choose_showNumbers"]'),
         await browser.click('span[name="choose_showMail"]'),
@@ -187,12 +199,12 @@ describe("uc/blog", function() {
 
 
         // reload page again
-        await browser.visit("/blog/WN290");
+        await browser.open(testutil.expandUrl("/blog/WN290"));
         browser.assert.text("textarea#markdown24", "Changed Text");
         should(errors).eql([]);
       });
       it("should show Full View", async function() {
-        await browser.visit("/blog/WN290");
+        await browser.open(testutil.expandUrl("/blog/WN290"));
         await browser.click("a[href='/blog/WN290/Full']");
         browser.assert.expectHtmlSync("blog", "blog_wn290_full");
 
@@ -208,11 +220,11 @@ describe("uc/blog", function() {
         browser.query("textarea#lmarkdown24").value = "Changed Text in full review";
         await browser.fire("textarea#lmarkdown24", "change");
 
-        await browser.visit("/blog/WN290");
+        await browser.open(testutil.expandUrl("/blog/WN290"));
         browser.assert.text("textarea#lmarkdown24", "Changed Text in full review");
       });
       it("should show Review View", async function() {
-        await browser.visit("/blog/WN290?tab=review");
+        await browser.open(testutil.expandUrl("/blog/WN290?tab=review"));
         browser.assert.expectHtmlSync("blog", "blog_wn290_review");
 
         let selector = "li#wn290_24";
@@ -227,19 +239,19 @@ describe("uc/blog", function() {
         browser.query("textarea#markdown24").value = "Changed Text in review mode";
         await browser.fire("textarea#markdown24", "change");
 
-        await browser.visit("/blog/WN290");
+        await browser.open(testutil.expandUrl("/blog/WN290"));
         browser.assert.text("textarea#markdown24", "Changed Text in review mode");
       });
       it("should show Statistic View", async function() {
-        await browser.visit("/blog/WN290/stat");
+        await browser.open(testutil.expandUrl("/blog/WN290/stat"));
         browser.assert.expectHtmlSync("blog", "blog_wn290_stat");
       });
       it("should show edit View", async function() {
-        await browser.visit("/blog/edit/WN290");
+        await browser.open(testutil.expandUrl("/blog/edit/WN290"));
         browser.assert.expectHtmlSync("blog", "blog_wn290_edit");
       });
       it("should show the Blog List", async function() {
-        await browser.visit("/blog/list?status=edit");
+        await browser.open(testutil.expandUrl("/blog/list?status=edit"));
         browser.assert.expectHtmlSync("blog", "blog_list");
       });
     });
