@@ -7,6 +7,7 @@
 var http    = require('http');
 var async   = require('async');
 var debug   = require('debug')('OSMBC:server');
+const express = require('express');
 
 var stoppable = require('stoppable');
 
@@ -27,15 +28,16 @@ var slackReceiver  = require('../notification/slackReceiver.js');
 /**
  * Get port from environment and store in Express.
  */
-
+let osmbcApp = express();
+ app.setupApp(osmbcApp);
 var port = normalizePort(process.env.PORT || config.getServerPort());
-app.set('port', port);
+osmbcApp.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = stoppable(http.createServer(app));
+var server = stoppable(http.createServer(osmbcApp));
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -9,9 +9,10 @@ const sinon = require("sinon");
 
 var debug  = require("debug")("OSMBC:test:testutil");
 // use zombie.js as headless browser
-var wendigo = require("wendigo");
+const puppeteer = require('puppeteer');
 var http = require("http");
 var request = require("request");
+const express = require('express');
 
 var config = require("../config.js");
 
@@ -373,7 +374,10 @@ exports.startServerSync = function startServerSync(userString) {
   debug("startServer");
   should.not.exist(userString);
   if (server) exports.stopServer();
-  server = http.createServer(app).listen(config.getServerPort());
+  let osmbcApp = express();
+
+  app.setupApp(osmbcApp);
+  server = http.createServer(osmbcApp).listen(config.getServerPort());
 };
 
 exports.startServer = function startServer(userString, callback) {
@@ -491,7 +495,7 @@ exports.nockHtmlPagesClear = function nockHtmlPagesClear() {
   if (target) target.dispatchEvent(event);
 }; */
 
-module.exports.expectHtmlSync = function expectHtmlSync(browser,errorList, givenPath, name) {
+module.exports.expectHtmlSync = async function expectHtmlSync(page,errorList, givenPath, name) {
   let stopOnError = false;
   if (!Array.isArray(errorList)) {
     stopOnError = true;
@@ -502,7 +506,7 @@ module.exports.expectHtmlSync = function expectHtmlSync(browser,errorList, given
   let expected = "not read yet";
   let expectedFile = path.join(__dirname, givenPath, name + ".html");
   let actualFile   = path.join(__dirname, givenPath, name + "_actual.html");
-  let string = browser.html();
+  let string = await page.content();
   try {
     expected = fs.readFileSync(expectedFile, "UTF8");
   } catch (err) {
