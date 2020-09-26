@@ -151,14 +151,26 @@ describe("util", function() {
     });
   });
   describe("turndown-it-sup", function(){
-
-
-
     it("should convert nested superscript ",function(){
       let md = "It contains [^1^](https://link.somewhere) a link with superscript";
       let html = markdown.render(md);
       let backconverted_md = turndownService.turndown(html);
       should(backconverted_md).eql(md);
+    });
+  });
+  describe("markdown-it-flag", function(){
+    it("test markdownitflag",function(){
+      markdown.use(require("../util/markdown-it-flags.js"),
+        {
+          enabled: ["DE","smiley"],
+          shortcuts:{smiley:":smiley",DE:":DE:"}
+        }
+      );
+
+      let md = ":smiley:  :DE: ";
+      let html = markdown.render(md);
+      console.log("result:::");
+      console.dir(html);
     });
   })
 });

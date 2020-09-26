@@ -44,6 +44,7 @@
     "jstransformer-verbatim": "^1.1.1",
     "lru-cache": "^5.1.1",
     "markdown-it": "11.0.x",
+    "markdown-it-emoji": "^1.4.0",
     "markdown-it-imsize": "^2.0.1",
     "markdown-it-sup": "^1.0.0",
     "moment": "^2.27.0",
